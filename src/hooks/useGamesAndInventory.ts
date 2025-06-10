@@ -13,9 +13,9 @@ export const useGamesAndInventory = () => {
     try {
       setError(null);
       console.log('🎮 Buscando jogos do backend...');
-      const res = await api.get<Game[]>('/jogos');
-      setGames(res.data);
-      console.log(`✅ ${res.data.length} jogos carregados com sucesso!`);
+      const data = await api.get('/jogos');
+      setGames(data || []);
+      console.log(`✅ ${(data || []).length} jogos carregados com sucesso!`);
     } catch (err: any) {
       console.error('❌ Erro ao buscar jogos:', err);
       setError('Erro ao carregar jogos do backend Azure.');
@@ -58,14 +58,15 @@ export const useGamesAndInventory = () => {
     }
   }, []);
 
-  // Busca o estoque
+  // Busca o estoque - corrigido para usar o endpoint correto
   const fetchInventory = useCallback(async () => {
     try {
       setError(null);
       console.log('📦 Buscando estoque do backend...');
-      const res = await api.get<InventoryItem[]>('/estoque');
-      setInventory(res.data);
-      console.log(`✅ ${res.data.length} itens de estoque carregados!`);
+      // Usando o endpoint correto: /api/estoque/consultar
+      const data = await api.get('/estoque/consultar');
+      setInventory(data || []);
+      console.log(`✅ ${(data || []).length} itens de estoque carregados!`);
     } catch (err: any) {
       console.error('❌ Erro ao buscar estoque:', err);
       setError('Erro ao carregar estoque do backend Azure.');
@@ -115,10 +116,10 @@ export const useGamesAndInventory = () => {
   const addGame = async (game: Omit<Game, 'id'>) => {
     try {
       console.log('➕ Adicionando novo jogo:', game.titulo);
-      const res = await api.post<Game>('/jogos', game);
-      setGames(prev => [...prev, res.data]);
+      const data = await api.post('/jogos', game);
+      setGames(prev => [...prev, data]);
       console.log('✅ Jogo adicionado com sucesso!');
-      return res.data;
+      return data;
     } catch (err: any) {
       console.error('❌ Erro ao adicionar jogo:', err);
       throw new Error('Erro ao adicionar jogo no backend Azure.');
@@ -129,10 +130,10 @@ export const useGamesAndInventory = () => {
   const updateGame = async (id: number, updates: Partial<Game>) => {
     try {
       console.log('✏️ Atualizando jogo ID:', id);
-      const res = await api.put<Game>(`/jogos/${id}`, updates);
-      setGames(prev => prev.map(g => g.id === id ? res.data : g));
+      const data = await api.put(`/jogos/${id}`, updates);
+      setGames(prev => prev.map(g => g.id === id ? data : g));
       console.log('✅ Jogo atualizado com sucesso!');
-      return res.data;
+      return data;
     } catch (err: any) {
       console.error('❌ Erro ao atualizar jogo:', err);
       throw new Error('Erro ao atualizar jogo no backend Azure.');
@@ -152,16 +153,17 @@ export const useGamesAndInventory = () => {
     }
   };
 
-  // Adiciona uma movimentação de estoque
+  // Adiciona uma movimentação de estoque - corrigido para usar o endpoint correto
   const addStockMovement = async (movement: Omit<StockMovement, 'id'>) => {
     try {
       console.log('📋 Adicionando movimentação de estoque:', movement);
-      const res = await api.post('/movimentacoes', movement);
+      // Usando o endpoint correto: /api/estoque/movimentar
+      const data = await api.post('/estoque/movimentar', movement);
       console.log('✅ Movimentação adicionada com sucesso!');
       
       // Recarrega o estoque após a movimentação
       await fetchInventory();
-      return res.data;
+      return data;
     } catch (err: any) {
       console.error('❌ Erro ao adicionar movimentação:', err);
       throw new Error('Erro ao adicionar movimentação no backend Azure.');

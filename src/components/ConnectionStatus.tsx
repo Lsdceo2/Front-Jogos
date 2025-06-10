@@ -11,7 +11,8 @@ const ConnectionStatus: React.FC = () => {
     setIsChecking(true);
     try {
       // Tenta fazer uma requisição simples para verificar se o backend está respondendo
-      await api.get('/jogos', { timeout: 5000 });
+      // Usando o endpoint correto do seu backend
+      await api.get('/jogos');
       setIsConnected(true);
       setLastCheck(new Date());
       console.log('✅ Backend conectado com sucesso!');
